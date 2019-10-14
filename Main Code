@@ -1,0 +1,60 @@
+//Plantuino Main Code:
+
+//change these values below if you change the pins on the arduino
+
+//initializng input pins
+const int humiditySensorPin=???;    //FIX ME
+const int temperatureSesnorPin=???; //FIX ME
+const int lightSesnorPin=???;       //FIX ME
+const int moistureSesnorPin=???;    //FIX ME
+
+//intializing relay module
+const int relayPin=???;             //FIX ME
+
+//initializing output pins
+const int valvePin=???;             //FIX ME
+const int fanPin=???;               //FIX ME
+const int lightPin=???;             //FIX ME
+
+//initializing variables
+int temperatureVal=0;
+int moistureVal=0;
+int lightVal=0;
+
+
+void setup() {
+  
+  pinMode(humiditySensorPin,INPUT);
+  pinMode(temperatureSesnorPin,INPUT);
+  pinMode(lightSesnorPin,INPUT);
+  pinMode(moistureSesnorPin,INPUT);
+
+  pinMode(valvePin,OUTPUT);
+  pinMode(fanPin,OUTPUT);
+  pinMode(lightPin,OUTPUT);
+
+}
+
+void loop() {
+  
+  temperatureVal=analogRead(temperaturePin);  //FIX ME (if it's digitalRead instead)
+  moistureVal=analogRead(moisturePin);        //FIX ME (if it's digitalRead instead)
+  lightVal=analogRead(lightPin);              //FIX ME (if it's digitalRead instead)
+  
+  if(/*condition not met for soil moisture */) //this opens the watering valve          //FIX ME
+    digitWrite(valvePin,HIGH);
+  else // this closes the valve
+    digitWrite(valvePin,LOW); 
+    
+  if(/*condition not met for light */) //this turns on the growing light        //FIX ME
+    digitWrite(lightPin,HIGH);
+  else // this turns off the light
+    digitWrite(lightPin,LOW);
+    
+  if(/*condition not met for temperature */) //this turns on the fan            //FIX ME
+    digitWrite(fanPin,HIGH);
+  else // this turns off the fan
+    digitWrite(fanPin,LOW);
+
+  delay(???);   //FIX ME (how long should we wait to take measurements again?)
+}
