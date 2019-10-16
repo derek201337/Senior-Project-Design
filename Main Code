@@ -6,8 +6,8 @@
 const int humiditySensorPin=???;    //FIX ME
 const int temperatureSensorPin=???; //FIX ME
 const int lightSensorPin=1;       //FIX ME
-const int moiSensorSDA_Pin=4;    
-const int moiSensorSCL_Pin=5;
+const int moistureSensorSDA_Pin=4;    
+const int moistureSensorSCL_Pin=5;
 
 //intializing relay module
 const int relayPin=???;             //FIX ME
@@ -28,11 +28,12 @@ void setup() {
   pinMode(humiditySensorPin,INPUT);
   pinMode(temperatureSensorPin,INPUT);
   pinMode(lightSensorPin,INPUT);
-  pinMode(moistureSensorPin,INPUT);
+  pinMode(moistureSensorSDA_Pin,INPUT);
 
   pinMode(valvePin,OUTPUT);
   pinMode(fanPin,OUTPUT);
   pinMode(lightPin,OUTPUT);
+  pinMode(moistureSensorSCL_Pin,OUTPUT);
 
 }
 
