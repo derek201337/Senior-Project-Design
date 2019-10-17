@@ -42,7 +42,7 @@ void setup() {
 void loop() {
   
   temperatureVal=analogRead(temperaturePin);  //FIX ME (if it's digitalRead instead)
-  moistureVal=analogRead(moistureSensorSDA_Pin);        //FIX ME (if it's digitalRead instead)
+  moistureVal=analogRead(moistureSensorSDA_Pin); 
   lightVal=analogRead(lightPin);              //FIX ME (if it's digitalRead instead)
   humidityVal=digitalRead(humidityPin);
   
