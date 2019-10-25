@@ -1,7 +1,7 @@
 //Plantuino Main Code:
 
 //Libraries
-#include <DHT.h>;
+#include <dht.h>;
 
 //initializng input pins (temperature and humidity uses a library function)
 const int lightSensorPin=0;      
