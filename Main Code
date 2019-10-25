@@ -1,10 +1,9 @@
 //Plantuino Main Code:
 
-//change these values below if you change the pins on the arduino
+//Libraries
+#include <DHT.h>;
 
-//initializng input pins
-const int humiditySensorPin=2;    
-const int temperatureSensorPin=???; //FIX ME
+//initializng input pins (temperature and humidity uses a library function)
 const int lightSensorPin=0;      
 const int moistureSensorSDA_Pin=4; 
 
@@ -20,9 +19,15 @@ const int fanPin=???;               //FIX ME
 const int lightPin=???;             //FIX ME
 
 //initializing variables
-int temperatureVal=0;
-int moistureVal=0;
-int lightVal=0;
+float temperatureVal=0;
+float humidityVal=0;
+int moistureVal=0;  //FIX ME should this be float?
+int lightVal=0;   //FIX ME should this be float?
+
+//DHT22 initialization
+#define DHTPIN 2     //what pin the sensor is connected to
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
 
 
 void setup() {
@@ -35,16 +40,19 @@ void setup() {
   pinMode(valvePin,OUTPUT);
   pinMode(fanPin,OUTPUT);
   pinMode(lightPin,OUTPUT);
-  pinMode(moistureSensorSCL_Pin,OUTPUT);
+  pinMode(moistureSensorSCL_Pin,OUTPUT); //clock
+
+  dht.begin();
 
 }
 
 void loop() {
   
-  temperatureVal=analogRead(temperaturePin);  //FIX ME (if it's digitalRead instead)
+  temperatureVal=dht.readTemperature();
+  humidityVal=dht.readHumidity();  //this might not be a real function in my(Derek) arduino dht library ???
   moistureVal=analogRead(moistureSensorSDA_Pin); 
-  lightVal=analogRead(lightPin);              //FIX ME (if it's digitalRead instead)
-  humidityVal=digitalRead(humidityPin);
+  lightVal=analogRead(lightPin);         
+  
   
   if(/*condition not met for soil moisture */) //this opens the watering valve          //FIX ME
     digitWrite(valvePin,HIGH);
@@ -61,5 +69,5 @@ void loop() {
   else // this turns off the fan
     digitWrite(fanPin,LOW);
 
-  delay(???);   //FIX ME (how long should we wait to take measurements again?)
+  delay(2000);   //FIX ME (how long should we wait to take measurements again?)
 }
