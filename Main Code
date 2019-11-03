@@ -1,7 +1,8 @@
 //Plantuino Main Code:
 
 //Libraries
-#include <dht.h>;
+#include <dht.h>
+#include <Adafruit_seesaw.h>
 
 //initializng input pins (temperature and humidity uses a library function)
 const int lightSensorPin=0;      
