@@ -4,7 +4,7 @@
    Dev: Michalis Vasilakis // Date: 1/7/2015 // www.ardumotive.com */
 
 //Libraries
-#include <DHT.h>;
+#include <DHT.h>
 
 //Constants
 #define DHTPIN 2     // what pin we're connected to
