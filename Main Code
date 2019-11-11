@@ -1,12 +1,13 @@
 //Plantuino Main Code:
 
 //Libraries
-#include <dht.h>
-#include <Adafruit_seesaw.h>
+#include <DHT.h> //DHT sensor
+#include <Adafruit_seesaw.h>  //moisture sensor
 
-//initializng input pins (temperature and humidity uses a library function)
+//initializng input pins
 const int lightSensorPin=0;      
 const int moistureSensorSDA_Pin=4; 
+const int dhtPin=2; //temperature and humidity sensor
 
 //intializing clock pin
 const int moistureSensorSCL_Pin=5;
@@ -22,19 +23,18 @@ const int lightPin=???;             //FIX ME
 //initializing variables
 float temperatureVal=0;
 float humidityVal=0;
-int moistureVal=0;  //FIX ME should this be float?
-int lightVal=0;   //FIX ME should this be float?
+int moistureVal=0; //FIX ME should this be float?
+int lightVal=0; //FIX ME should this be float?
 
 //DHT22 initialization
 #define DHTPIN 2     //what pin the sensor is connected to
-#define DHTTYPE DHT22
+#define DHTTYPE DHT22 
 DHT dht(DHTPIN, DHTTYPE);
 
 
 void setup() {
   
-  pinMode(humiditySensorPin,INPUT);
-  pinMode(temperatureSensorPin,INPUT);
+  pinMode(dhtPin,INPUT);
   pinMode(lightSensorPin,INPUT);
   pinMode(moistureSensorSDA_Pin,INPUT);
 
@@ -43,6 +43,8 @@ void setup() {
   pinMode(lightPin,OUTPUT);
   pinMode(moistureSensorSCL_Pin,OUTPUT); //clock
 
+
+
   dht.begin();
 
 }
@@ -50,10 +52,9 @@ void setup() {
 void loop() {
   
   temperatureVal=dht.readTemperature();
-  humidityVal=dht.readHumidity();  //this might not be a real function in my(Derek) arduino dht library ???
+  humidityVal=dht.readHumidity(); 
   moistureVal=analogRead(moistureSensorSDA_Pin); 
-  lightVal=analogRead(lightPin);         
-  
+  lightVal=analogRead(lightPin);
   
   if(/*condition not met for soil moisture */) //this opens the watering valve          //FIX ME
     digitWrite(valvePin,HIGH);
