@@ -1,0 +1,62 @@
+//Libraries
+#include <DHT.h> //DHT sensor
+#include <SPI.h> //SD card
+#include <SD.h> //SD card
+
+//initializng input pins
+const int dhtPin=2; //temperature and humidity sensor
+
+//initializing variables
+float temperatureVal=0;
+float humidityVal=0;
+
+#define DHTPIN 2     //what pin the sensor is connected to
+#define DHTTYPE DHT22 
+DHT dht(DHTPIN, DHTTYPE);
+
+//sd card intializiation
+File sensorDataFile;
+
+void setup() {
+  pinMode(dhtPin,INPUT);
+
+  dht.begin();
+
+  Serial.begin(9600);
+  while (!Serial) {; // wait for serial port to connect. Needed for native USB port only
+  }
+  Serial.print("Initializing SD card...");
+
+  if (!SD.begin(10)) {
+  Serial.println("initialization failed!");
+  while (1);
+  }
+
+  Serial.println("initialization done.");
+
+  sensorDataFile=SD.open("data.txt", FILE_WRITE);
+  sensorDataFile.println("Temp Sensor, Humidity Sesnor");
+  sensorDataFile.close();
+
+}
+
+void loop() {
+  temperatureVal=dht.readTemperature();
+  humidityVal=dht.readHumidity();
+
+  sensorDataFile = SD.open("data.txt", FILE_WRITE);
+  
+  //data logging:
+  if (sensorDataFile) {
+    Serial.print("Writing to data.txt...");
+    sensorDataFile.print(dht.readTemperature());
+    sensorDataFile.print(" , ");
+    sensorDataFile.println(humidityVal=dht.readHumidity());
+    sensorDataFile.close();
+  } else {
+    Serial.println("error opening data.txt");
+  }
+
+  delay(2000);   //FIX ME (how long should we wait to take measurements again?)
+
+}
