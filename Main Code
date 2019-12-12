@@ -99,13 +99,13 @@ void loop() {
 
   //data logging:
   if (sensorDataFile) {
-    Serial.print("Writing to data.txt...");
+    Serial.println("Writing to data.txt...");
     sensorDataFile.print(dht.readTemperature());
-    sensorDataFile.print(" ");
+    sensorDataFile.print(" , ");
     sensorDataFile.print(humidityVal=dht.readHumidity());
-    sensorDataFile.print(" ");
+    sensorDataFile.print(" , ");
     sensorDataFile.print(analogRead(lightPin));
-    sensorDataFile.print(" ");
+    sensorDataFile.print(" , ");
     sensorDataFile.println(analogRead(moistureSensorSDA_Pin));
     sensorDataFile.close();
   } else {
