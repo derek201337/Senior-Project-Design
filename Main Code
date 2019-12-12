@@ -107,7 +107,6 @@ void loop() {
     sensorDataFile.print(" ");
     sensorDataFile.println(analogRead(moistureSensorSDA_Pin));
     sensorDataFile.close();
-    Serial.println("done.");
   } else {
     Serial.println("error opening data.txt");
   }
