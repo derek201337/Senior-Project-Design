@@ -1,1 +1,19 @@
+const int RELAY_ENABLE = 2;
 
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(RELAY_ENABLE, OUTPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  Serial.println("Relay ON");
+  digitalWrite(RELAY_ENABLE, LOW); // The relay is active low, so it turns on when we set the pin to LOW
+  delay(1000);
+
+  Serial.println("Relay OFF");
+  digitalWrite(RELAY_ENABLE, HIGH);
+  delay(1000);
+}
