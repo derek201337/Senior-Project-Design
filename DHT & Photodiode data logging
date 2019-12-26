@@ -4,11 +4,13 @@
 #include <SD.h> //SD card
 
 //initializng input pins
-const int dhtPin=2; //temperature and humidity sensor
+const int dhtPin=2; //temperature and humidity sensor pin
+const int lightSensorPin=0; //light sensor pin
 
 //initializing variables
 float temperatureVal=0;
 float humidityVal=0;
+int lightVal=0;
 
 #define DHTPIN 2     //what pin the sensor is connected to
 #define DHTTYPE DHT22 
@@ -19,6 +21,7 @@ File sensorDataFile;
 
 void setup() {
   pinMode(dhtPin,INPUT);
+  pinMode(lightSensorPin,INPUT);
 
   dht.begin();
 
@@ -35,7 +38,7 @@ void setup() {
   Serial.println("initialization done.");
 
   sensorDataFile=SD.open("data.txt", FILE_WRITE);
-  sensorDataFile.println("Temp Sensor, Humidity Sesnor");
+  sensorDataFile.println("Temp Sensor, Humidity Sesnor, Light Sensor");
   sensorDataFile.close();
 
 }
@@ -43,15 +46,18 @@ void setup() {
 void loop() {
   temperatureVal=dht.readTemperature();
   humidityVal=dht.readHumidity();
+  lightVal=analogRead(lightSensorPin);
 
   sensorDataFile = SD.open("data.txt", FILE_WRITE);
   
   //data logging:
   if (sensorDataFile) {
-    Serial.print("Writing to data.txt...");
-    sensorDataFile.print(dht.readTemperature());
-    sensorDataFile.print(" , ");
-    sensorDataFile.println(humidityVal=dht.readHumidity());
+    Serial.println("Writing to data.txt...");
+    sensorDataFile.print(temperatureVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.print(humidityVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.println(lightVal);
     sensorDataFile.close();
   } else {
     Serial.println("error opening data.txt");
