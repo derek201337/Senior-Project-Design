@@ -76,7 +76,7 @@ void loop() {
   temperatureVal=dht.readTemperature();
   humidityVal=dht.readHumidity();
   moistureVal=analogRead(moistureSensorSDA_Pin); 
-  lightVal=analogRead(lightPin);
+  lightVal=analogRead(lightSensorPin);
   
   if(moistureVal<???){ 
     digitalWrite(valvePin, LOW); // The relay is active low, so it turns on when we set the pin to LOW
@@ -101,13 +101,13 @@ void loop() {
   //data logging:
   if (sensorDataFile) {
     Serial.println("Writing to data.txt...");
-    sensorDataFile.print(dht.readTemperature());
-    sensorDataFile.print(" ");
-    sensorDataFile.print(humidityVal=dht.readHumidity());
-    sensorDataFile.print(" ");
-    sensorDataFile.print(analogRead(lightPin));
-    sensorDataFile.print(" ");
-    sensorDataFile.println(analogRead(moistureSensorSDA_Pin));
+    sensorDataFile.print(temperatureVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.print(humidityVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.print(LightVal));
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.println(moistureVal);
     sensorDataFile.close();
   } else {
     Serial.println("error opening data.txt");
