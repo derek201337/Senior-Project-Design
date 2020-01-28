@@ -17,9 +17,6 @@ const int valvePin = 3;
 //intializing clock pin
 const int moistureSensorSCL_Pin=5;
 
-//intializing relay module
-const int relayPin=???;             //FIX ME
-
 //initializing output pins
 const int fanPin=???;               //FIX ME
 const int lightPin=???;             //FIX ME
