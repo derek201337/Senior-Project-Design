@@ -68,11 +68,13 @@ void loop() {
 
   if(lightVal>350){
     digitalWrite(RELAY_ENABLE, HIGH); // The relay is active low, so it turns on when we set the pin to LOW
+    delay(2500);
+    digitalWrite(RELAY_ENABLE, LOW);
+    delay(5000);
   }
   else {
     digitalWrite(RELAY_ENABLE, LOW);
+    delay(2000);
   }
-
-  delay(2000);   //FIX ME (how long should we wait to take measurements again?)
 
 }
