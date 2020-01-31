@@ -22,5 +22,5 @@ void loop() {
 
   Serial.print("Temperature: "); Serial.print(tempC); Serial.println("*C");
   Serial.print("Capacitive: "); Serial.println(capread);
-  delay(100);
+  delay(1000);
 }
