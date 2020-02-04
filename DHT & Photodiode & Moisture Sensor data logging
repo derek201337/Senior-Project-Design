@@ -71,6 +71,8 @@ void loop() {
     sensorDataFile.print("     ,      ");
     sensorDataFile.println(moistVal);
     sensorDataFile.close();
+    Serial.print("Temperature: "); Serial.print(soilTempVal); Serial.println("*C");  //debugging
+    Serial.print("Capacitive: "); Serial.println(moistVal);                          //debugging
   } else {
     Serial.println("error opening data.txt");
   }
