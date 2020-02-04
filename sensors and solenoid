@@ -11,7 +11,7 @@ const int lightSensorPin=0; //light sensor pin
 const int RELAY_ENABLE = 3;
 
 //initializing variables
-float temperatureVal=0;
+float airTempVal=0;
 float humidityVal=0;
 int lightVal=0;
 float soilTempVal=0;
@@ -46,13 +46,13 @@ void setup() {
   Serial.println("initialization done.");
 
   sensorDataFile=SD.open("data.txt", FILE_WRITE);
-  sensorDataFile.println("Temp Sensor, Humidity Sesnor, Light Sensor");
+  sensorDataFile.println("Air Temp Sensor, Humidity Sesnor, Light Sensor, Soil Temp Sensor, Soil Moisture");
   sensorDataFile.close();
 
 }
 
 void loop() {
-  temperatureVal=dht.readTemperature();
+  airTempVal=dht.readTemperature();
   humidityVal=dht.readHumidity();
   lightVal=analogRead(lightSensorPin);
   soilTempVal=ss.getTemp();
