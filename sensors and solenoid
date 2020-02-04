@@ -2,6 +2,7 @@
 #include <DHT.h> //DHT sensor
 #include <SPI.h> //SD card
 #include <SD.h> //SD card
+#include <Adafruit_seesaw.h> //moisture sensor
 
 //initializng input pins
 const int dhtPin=2; //temperature and humidity sensor pin
@@ -13,10 +14,14 @@ const int RELAY_ENABLE = 3;
 float temperatureVal=0;
 float humidityVal=0;
 int lightVal=0;
+float soilTempVal=0;
+uint16_t moistVal=0;
 
 #define DHTPIN 2     //what pin the sensor is connected to
 #define DHTTYPE DHT22 
 DHT dht(DHTPIN, DHTTYPE);
+
+Adafruit_seesaw ss;
 
 //sd card intializiation
 File sensorDataFile;
@@ -50,30 +55,40 @@ void loop() {
   temperatureVal=dht.readTemperature();
   humidityVal=dht.readHumidity();
   lightVal=analogRead(lightSensorPin);
+  soilTempVal=ss.getTemp();
+  moistVal=ss.touchRead(0);
+
+  Serial.print("Temperature: "); Serial.print(soilTempVal); Serial.println("*C");  //debugging
+  Serial.print("Capacitive: "); Serial.println(moistVal);                          //debugging
 
   sensorDataFile = SD.open("data.txt", FILE_WRITE);
   
   //data logging:
   if (sensorDataFile) {
     Serial.println("Writing to data.txt...");
-    sensorDataFile.print(temperatureVal);
-    sensorDataFile.print("     ,      ");
+    sensorDataFile.print("   ");
+    sensorDataFile.print(airTempVal);
+    sensorDataFile.print("       ,      ");
     sensorDataFile.print(humidityVal);
     sensorDataFile.print("     ,      ");
-    sensorDataFile.println(lightVal);
+    sensorDataFile.print(lightVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.print(soilTempVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.println(moistVal);
     sensorDataFile.close();
   } else {
     Serial.println("error opening data.txt");
   }
 
   if(lightVal>350){
-    digitalWrite(RELAY_ENABLE, HIGH); // The relay is active low, so it turns on when we set the pin to LOW
-    delay(2500);
-    digitalWrite(RELAY_ENABLE, LOW);
-    delay(5000);
+    digitalWrite(RELAY_ENABLE, LOW); // The relay is active low, so it turns on when we set the pin to LOW
+    delay(1000);
+    digitalWrite(RELAY_ENABLE, HIGH);
+    delay(3000);
   }
   else {
-    digitalWrite(RELAY_ENABLE, LOW);
+    digitalWrite(RELAY_ENABLE, HIGH);
     delay(2000);
   }
 
