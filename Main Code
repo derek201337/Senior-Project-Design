@@ -4,25 +4,25 @@
 #include <SD.h> //SD card
 #include <Adafruit_seesaw.h> //moisture sensor
 
-//initializng input pins
+//input pin intializiations
 const int dhtPin=2; //temperature and humidity sensor pin
 const int lightSensorPin=0; //light sensor pin
+
+//output pin intializiation
+const int RELAY_ENABLE = 3; //solenoid valve
+/*
+const int fanPin=???;               //FIX ME
+const int lightPin=???;             //FIX ME
+*/
+
+//sd card intializiation
+File sensorDataFile;
 
 //other initializations
 #define DHTPIN 2 //what pin the DHT sensor is connected to
 #define DHTTYPE DHT22 
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_seesaw ss;
-
-//sd card intializiation
-File sensorDataFile;
-
-//initializing output pins
-const int RELAY_ENABLE = 3; //solenoid valve
-/*
-const int fanPin=???;               //FIX ME
-const int lightPin=???;             //FIX ME
-*/
 
 void setup() {
   pinMode(dhtPin,INPUT);
