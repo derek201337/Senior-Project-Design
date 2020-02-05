@@ -1,114 +1,103 @@
-//Plantuino Main Code:
-
 //Libraries
 #include <DHT.h> //DHT sensor
-#include <Adafruit_seesaw.h>  //moisture sensor
 #include <SPI.h> //SD card
 #include <SD.h> //SD card
-
+#include <Adafruit_seesaw.h> //moisture sensor
 //initializng input pins
-const int lightSensorPin=0;      
-const int moistureSensorSDA_Pin=4; 
-const int dhtPin=2; //temperature and humidity sensor
-
-//relay module/solenoid valve pin
-const int valvePin = 3;
-
-//intializing clock pin
-const int moistureSensorSCL_Pin=5;
-
-//initializing output pins
-const int fanPin=???;               //FIX ME
-const int lightPin=???;             //FIX ME
-
-//initializing variables
-float temperatureVal=0;
-float humidityVal=0;
-int moistureVal=0; //FIX ME should this be float?
-int lightVal=0; //FIX ME should this be float?
-
-//DHT22 initialization
-#define DHTPIN 2     //what pin the sensor is connected to
+const int dhtPin=2; //temperature and humidity sensor pin
+const int lightSensorPin=0; //light sensor pin
+const int RELAY_ENABLE = 3;
+#define DHTPIN 2 //what pin the DHT sensor is connected to
 #define DHTTYPE DHT22 
 DHT dht(DHTPIN, DHTTYPE);
-
+Adafruit_seesaw ss;
 //sd card intializiation
 File sensorDataFile;
-
-
+//initializing output pins
+/*
+const int fanPin=???;               //FIX ME
+const int lightPin=???;             //FIX ME
+*/
 
 void setup() {
-  
   pinMode(dhtPin,INPUT);
   pinMode(lightSensorPin,INPUT);
-  pinMode(moistureSensorSDA_Pin,INPUT);
-
-  pinMode(valvePin,OUTPUT);
+  /*
   pinMode(fanPin,OUTPUT);
   pinMode(lightPin,OUTPUT);
-  pinMode(moistureSensorSCL_Pin,OUTPUT); //clock
-
+  */
   dht.begin();
-
   Serial.begin(9600);
-  while (!Serial) {; // wait for serial port to connect. Needed for native USB port only
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
   }
   Serial.print("Initializing SD card...");
-
   if (!SD.begin(10)) {
   Serial.println("initialization failed!");
   while (1);
   }
-
   Serial.println("initialization done.");
-
   sensorDataFile=SD.open("data.txt", FILE_WRITE);
-  sensorDataFile.println("Temp Sensor, Humidity Sesnor, Light Sensor, Moisture Sensor");
+  sensorDataFile.println("Air Temp Sensor, Humidity Sesnor, Light Sensor, Soil Temp Sensor, Soil Moisture");
   sensorDataFile.close();
-
 }
 
 void loop() {
-  
-  temperatureVal=dht.readTemperature();
-  humidityVal=dht.readHumidity();
-  moistureVal=analogRead(moistureSensorSDA_Pin); 
-  lightVal=analogRead(lightSensorPin);
-  
-  if(moistureVal<???){ 
-    digitalWrite(valvePin, LOW); // The relay is active low, so it turns on when we set the pin to LOW
-  } else /
-    digitalWrite(valvePin,HIGH); // turns valve off
-    
-/*    NOT USING THIS YET    
+  dataLogging();
+  actuation();
+  delay(2000);   //how long should we wait to take measurements again?
+}
 
-  if(condition not met for light){ //this turns on the growing light        //FIX ME
+void dataLogging() {
+  float airTempVal=dht.readTemperature();
+  float humidityVal=dht.readHumidity();
+  int lightVal=analogRead(lightSensorPin);
+  float soilTempVal=ss.getTemp();
+  uint16_t moistVal=ss.touchRead(0);
+  sensorDataFile = SD.open("data.txt", FILE_WRITE);
+  if (sensorDataFile) {
+    Serial.println("Writing to data.txt...");
+    sensorDataFile.print("   ");
+    sensorDataFile.print(airTempVal);
+    sensorDataFile.print("       ,      ");
+    sensorDataFile.print(humidityVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.print(lightVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.print(soilTempVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.println(moistVal);
+    sensorDataFile.close();
+    Serial.print("Temperature: "); Serial.print(soilTempVal); Serial.println("*C");  //debugging
+    Serial.print("Capacitive: "); Serial.println(moistVal);                          //debugging
+  }else {
+    Serial.println("error opening data.txt");  //debugging
+  }
+}
+
+void actuation();{
+  float airTempVal=dht.readTemperature();
+  float humidityVal=dht.readHumidity();
+  int lightVal=analogRead(lightSensorPin);
+  float soilTempVal=ss.getTemp();
+  uint16_t moistVal=ss.touchRead(0);
+  if(lightVal>350){
+    digitalWrite(RELAY_ENABLE, LOW); // The relay is active low, so it turns on when we set the pin to LOW
+    delay(1000);
+    digitalWrite(RELAY_ENABLE, HIGH);
+    delay(3000);
+  }else {
+    digitalWrite(RELAY_ENABLE, HIGH);
+    delay(2000);
+  }
+  /* 
+  if(condition not met for light){         //FIX ME
     digitWrite(lightPin,HIGH);
   } else // this turns off the light
     digitWrite(lightPin,LOW);
-    
-  if(condition not met for temperature){ //this turns on the fan            //FIX ME
+  if(condition not met for temperature){   //FIX ME
     digitWrite(fanPin,HIGH);
   } else // this turns off the fan
     digitWrite(fanPin,LOW);
-*/
-
-  sensorDataFile = SD.open("data.txt", FILE_WRITE);
-
-  //data logging:
-  if (sensorDataFile) {
-    Serial.println("Writing to data.txt...");
-    sensorDataFile.print(temperatureVal);
-    sensorDataFile.print("     ,      ");
-    sensorDataFile.print(humidityVal);
-    sensorDataFile.print("     ,      ");
-    sensorDataFile.print(LightVal));
-    sensorDataFile.print("     ,      ");
-    sensorDataFile.println(moistureVal);
-    sensorDataFile.close();
-  } else {
-    Serial.println("error opening data.txt");
-  }
-
-  delay(2000);   //how long to wait before taking measurements again (units in ms)
+  */
 }
