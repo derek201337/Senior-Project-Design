@@ -27,6 +27,7 @@ Adafruit_seesaw ss;
 void setup() {
   pinMode(dhtPin,INPUT);
   pinMode(lightSensorPin,INPUT);
+  pinMode(RELAY_ENABLE,OUTPUT);
   /*
   pinMode(fanPin,OUTPUT);
   pinMode(lightPin,OUTPUT);
