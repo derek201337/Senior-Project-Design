@@ -129,7 +129,7 @@ void waterDelay(){
 LIGHT SENSOR INFO:
 
 reading of...
-less than 10 is bright
+less than 10 is dark
 10 to 200 is dim
 200 to 500 is light
 500 to 800 is bright
