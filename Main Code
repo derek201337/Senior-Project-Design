@@ -29,7 +29,6 @@ bool actuatedFan=0; //will track if the plants used a fan recently
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_seesaw ss;
 
-
 void setup() {
   pinMode(dhtPin,INPUT);
   pinMode(lightSensorPin,INPUT);
@@ -41,13 +40,13 @@ void setup() {
   dht.begin();
   Serial.begin(9600);
   while (!ss.begin(0x36)) {
-    ; //wait for moisture sensor to connect
+    Serial.println("Moisture sensor initialization failed."); //wait for moisture sensor to connect
   } 
   while (!Serial) {
-    ; // wait for serial port to connect
+    Serial.println("Serial port initialization failed."); ; // wait for serial port to connect
   }
   if (!SD.begin(10)) {
-  Serial.println("SD card initialization failed.");
+    Serial.println("SD card initialization failed.");
   while (1); //while(1) is an infinite loop, it ends when SD intialization succeeds
   }
   sensorDataFile=SD.open("data.txt", FILE_WRITE);
@@ -87,23 +86,20 @@ void dataLogging() {
 }
 
 void actuation(){
-  float airTempVal=dht.readTemperature();
+  float airTempVal=((dht.readTemperature())*(9/5))+32;
   float humidityVal=dht.readHumidity();
   int lightVal=analogRead(lightSensorPin);
-  float soilTempVal=ss.getTemp();
+  float soilTempVal=((ss.getTemp())*(9/5))+32;
   uint16_t moistVal=ss.touchRead(0);
-  if(moistVal<800){
+  if(moistVal<450){
     digitalWrite(RELAY_ENABLE, LOW); // The relay is active low, so it turns on when we set the pin to LOW which opens the valve
-    delay(1000); //how long should we water the plant or garden?
+    delay(2000); //how long should we water the plant or garden?
     digitalWrite(RELAY_ENABLE, HIGH);
     actuatedValve=1;
   }else {
     digitalWrite(RELAY_ENABLE, HIGH);
     actuatedValve=0;
   }
-  Serial.print("Temperature: "); Serial.print(soilTempVal); Serial.println("*C");  //debugging
-  Serial.print("Capacitive: "); Serial.println(moistVal);                          //debugging
-  Serial.print("Actuated"); Serial.println(actuatedValve);  //debugging
   /* 
   if(condition not met for light){         //FIX ME
     digitWrite(lightPin,HIGH);
@@ -114,13 +110,24 @@ void actuation(){
   } else // this turns off the fan
     digitWrite(fanPin,LOW);
   */
+  Serial.print(airTempVal); //debugging
+  Serial.print(" ");
+  Serial.print(humidityVal); //debugging
+  Serial.print(" ");
+  Serial.print(lightVal); //debugging
+  Serial.print(" ");
+  Serial.print(soilTempVal);  //debugging
+  Serial.print(" ");
+  Serial.print(moistVal);   //debugging
+  Serial.print(" ");
+  Serial.println(actuatedValve);  //debugging
 }
 
 void waterDelay(){
   if(actuatedValve=0){
-    delay(2000);   //how long should we wait to take measurements again if the plant WAS NOT watered recently?
+    delay(1000);   //how long should we wait to take measurements again if the plant WAS NOT watered recently?
   }else {
-    delay(15000); //how long should we wait to take measurements again if the plant WAS watered recently?
+    delay(1000); //how long should we wait to take measurements again if the plant WAS watered recently?
   }
 }
 
@@ -133,15 +140,15 @@ less than 10 is dark
 10 to 200 is dim
 200 to 500 is light
 500 to 800 is bright
-greater than 800 is very right
+greater than 800 is very bright
 
 --------------------------------------------------
 MOISTURE SENSOR INFO:
 
 reading of... 
 air is around 350
-human touch is around 1000
-water is around ???
+human touch is around 1050
+water is around 550
 damp soil is around ???
 dry soil is around ???
 
