@@ -125,7 +125,7 @@ void actuation() {
 }
 
 void waterDelay() {
-  if(actuatedValve=0){ //not watered recently
+  if(actuatedValve==0){ //not watered recently
     if(airTempVal>85){ //not watered recently & hot
       if(lightVal>600){ //not watered recently & hot & bright
         delay(5000);
