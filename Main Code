@@ -9,7 +9,7 @@ const int dhtPin=2; //temperature and humidity sensor pin
 const int lightSensorPin=0; //light sensor pin
 
 //output pin intializiation
-const int RELAY_ENABLE = 3; //solenoid valve
+const int valvePin = 3; //solenoid valve
 /*
 const int fanPin=???;               //FIX ME
 const int lightPin=???;             //FIX ME
@@ -18,10 +18,17 @@ const int lightPin=???;             //FIX ME
 //sd card intializiation
 File sensorDataFile;
 
-//output device usage tracking
+//actuation tracking
 bool actuatedValve=0; //will track if the plants have been watered recently
 bool actuatedLight=0; //will track if the plants used a growing light recently
-bool actuatedFan=0; //will track if the plants used a fan recently
+bool actuatedFan=0; //will track if the plants used a fan recently\
+
+//value initializations
+float airTempVal=0;
+float humidityVal=0;
+int lightVal=0;
+float soilTempVal=0;
+uint16_t moistVal=0;
 
 //other initializations
 #define DHTPIN 2 //what pin the DHT sensor is connected to
@@ -32,7 +39,7 @@ Adafruit_seesaw ss;
 void setup() {
   pinMode(dhtPin,INPUT);
   pinMode(lightSensorPin,INPUT);
-  pinMode(RELAY_ENABLE,OUTPUT);
+  pinMode(valvePin,OUTPUT);
   /*
   pinMode(fanPin,OUTPUT);
   pinMode(lightPin,OUTPUT);
@@ -55,20 +62,19 @@ void setup() {
 }
 
 void loop() {
+  airTempVal=dht.readTemperature()*9.0/5.0+32.0;
+  humidityVal=dht.readHumidity();
+  lightVal=analogRead(lightSensorPin);
+  soilTempVal=ss.getTemp()*9.0/5.0+32.0;
+  moistVal=ss.touchRead(0);
   dataLogging();
   actuation();
   waterDelay();
 }
 
 void dataLogging() {
-  float airTempVal=dht.readTemperature();
-  float humidityVal=dht.readHumidity();
-  int lightVal=analogRead(lightSensorPin);
-  float soilTempVal=ss.getTemp();
-  uint16_t moistVal=ss.touchRead(0);
   sensorDataFile = SD.open("data.txt", FILE_WRITE);
   if (sensorDataFile) {
-    Serial.println("Writing to data.txt...");
     sensorDataFile.print("   ");
     sensorDataFile.print(airTempVal);
     sensorDataFile.print("       ,      ");
@@ -85,19 +91,14 @@ void dataLogging() {
   }
 }
 
-void actuation(){
-  float airTempVal=((dht.readTemperature())*(9/5))+32;
-  float humidityVal=dht.readHumidity();
-  int lightVal=analogRead(lightSensorPin);
-  float soilTempVal=((ss.getTemp())*(9/5))+32;
-  uint16_t moistVal=ss.touchRead(0);
-  if(moistVal<450){
-    digitalWrite(RELAY_ENABLE, LOW); // The relay is active low, so it turns on when we set the pin to LOW which opens the valve
+void actuation() {
+  if(moistVal<825){
+    digitalWrite(valvePin, LOW); // The relay is active low, so it turns on when we set the pin to LOW which opens the valve
     delay(2000); //how long should we water the plant or garden?
-    digitalWrite(RELAY_ENABLE, HIGH);
+    digitalWrite(valvePin, HIGH);
     actuatedValve=1;
   }else {
-    digitalWrite(RELAY_ENABLE, HIGH);
+    digitalWrite(valvePin, HIGH);
     actuatedValve=0;
   }
   /* 
@@ -123,39 +124,58 @@ void actuation(){
   Serial.println(actuatedValve);  //debugging
 }
 
-void waterDelay(){
-  if(actuatedValve=0){
-    delay(1000);   //how long should we wait to take measurements again if the plant WAS NOT watered recently?
-  }else {
-    delay(1000); //how long should we wait to take measurements again if the plant WAS watered recently?
+void waterDelay() {
+  if(actuatedValve=0){ //not watered recently
+    if(airTempVal>85){ //not watered recently & hot
+      if(lightVal>600){ //not watered recently & hot & bright
+        delay(5000);
+      }else{ //not watered recently & hot & not bright
+        delay(6000);
+      }
+    }else{ //not watered recently & not hot
+      if(lightVal>600){ //not watered recently & not hot & bright
+        delay(7000);
+      }else{ //not watered recently & not hot & not bright
+        delay(8000);
+      }
+    }
+  }else { //was watered recently
+    if(airTempVal>85){ //was watered recently & hot
+      if(lightVal>600){ //was watered recently & hot & bright
+        delay(1000);
+      }else{ //was watered recently & hot & not bright
+        delay(2000);
+      }
+    }else{ //was watered recently & not hot
+      if(lightVal>600){ //was watered recently & not hot & bright
+        delay(3000);
+      }else{ //was watered recently & not hot & not bright
+        delay(4000);
+      }
+    }
   }
 }
 
 /*
 --------------------------------------------------
-LIGHT SENSOR INFO:
-
-reading of...
+LIGHT SENSOR INFO: Reading of...
 less than 10 is dark
 10 to 200 is dim
 200 to 500 is light
 500 to 800 is bright
 greater than 800 is very bright
-
 --------------------------------------------------
-MOISTURE SENSOR INFO:
-
-reading of... 
+MOISTURE SENSOR INFO: Reading of... 
 air is around 350
-human touch is around 1050
-water is around 550
-damp soil is around ???
-dry soil is around ???
-
+dry soil is around 768
+slightly wet soil is around 1016
+moist soil is around 1017
+very moist soil is around 1017
+soak soil is around 1017
+(these soil readings were constant for loose and compact soil)
 --------------------------------------------------
-DHT SENSOR INFO:
-
-temperature conversion formula: F=(C)(9/5)+32   or  C=(F-32)(5/9)
-
+DHT SENSOR INFO: Temperature conversion formulas... 
+F=(C)*(9/5)+32 
+C=(F-32)*(5/9)
 --------------------------------------------------
  */
