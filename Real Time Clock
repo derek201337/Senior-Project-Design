@@ -1,0 +1,44 @@
+#include "RTClib.h"
+RTC_DS1307 rtc;
+DateTime now;
+  
+void setup() {
+  Serial.begin(9600);
+  
+  if (!rtc.begin()) {
+    Serial.println("RTC failed");
+  }
+  
+  //Set the time and date on the real time clock if necessary
+  if (! rtc.isrunning()) {
+    // following line sets the RTC to the date & time this sketch was compiled
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }  
+  
+}
+
+void loop() {
+  now = rtc.now();
+  
+  //Serial.print(now.unixtime()); // seconds since 2000
+  //Serial.print(",");
+  Serial.print(now.year(), DEC);
+  Serial.print("/");
+  Serial.print(now.month(), DEC);
+  Serial.print("/");
+  Serial.print(now.day(), DEC);
+  Serial.print(" ");
+  Serial.print(now.hour(), DEC);
+  Serial.print(":");
+  Serial.print(now.minute(), DEC);
+  Serial.print(":");
+  Serial.print(now.second(), DEC);
+  Serial.println(",");
+  delay(1000);
+}
+
+/*
+LINKS:
+https://www.arduino.cc/en/Reference/RTC
+https://github.com/gradyh/GradyHillhouseGarduino/blob/master/GradyHillhouse_Garduino.ino
+ */
