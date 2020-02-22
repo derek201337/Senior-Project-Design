@@ -1,23 +1,23 @@
-// Date and time functions using a DS1307 RTC connected via I2C and Wire lib
+// Date and time functions using a DS1307 RTC connected via I2C and Wire lib ***Actually need PCF8523***
 #include "RTClib.h"
 
-RTC_DS1307 rtc;
+RTC_PCF8523 rtc;             //Changed to PCF8523 as that is the board being used for our RTC.
 
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 void setup () {
   while (!Serial); // for Leonardo/Micro/Zero
 
-  Serial.begin(57600);
+  Serial.begin(9600);                   // Change Baud to 9600 to match our code style.
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
     while (1);
   }
 
-  if (! rtc.isrunning()) {
+  if (! rtc.initialized()) {          //Changed 'isrunning' to 'intialized' for our RTC needs.
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
-    // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));           //Uncommented this line to initialize your date and time.
     // This line sets the RTC with an explicit date & time, for example to set
     // January 21, 2014 at 3am you would call:
     // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
@@ -49,9 +49,9 @@ void loop () {
     Serial.println("d");
 
     // calculate a date which is 7 days, 12 hours, 30 minutes, and 6 seconds into the future
-    DateTime future (now + TimeSpan(7,12,30,6));
-
-    Serial.print(" now + 7d + 12h + 30m + 6s: ");
+    DateTime future (now + TimeSpan(330,29,30,6));
+                                                    //Changed span for broader testing range and possible errors.
+    Serial.print(" now + 330d + 29h + 30m + 6s: ");
     Serial.print(future.year(), DEC);
     Serial.print('/');
     Serial.print(future.month(), DEC);
