@@ -10,10 +10,8 @@ const int lightSensorPin=0; //light sensor pin
 
 //output pin intializiation
 const int valvePin = 3; //solenoid valve
-/*
-const int fanPin=???;               //FIX ME
-const int lightPin=???;             //FIX ME
-*/
+/*const int fanPin=???;
+const int lightPin=???;*/
 
 //sd card intializiation
 File sensorDataFile;
@@ -21,7 +19,7 @@ File sensorDataFile;
 //actuation tracking
 bool actuatedValve=0; //will track if the plants have been watered recently
 bool actuatedLight=0; //will track if the plants used a growing light recently
-bool actuatedFan=0; //will track if the plants used a fan recently\
+bool actuatedFan=0; //will track if the plants used a fan recently
 
 //value initializations
 float airTempVal=0;
@@ -29,6 +27,7 @@ float humidityVal=0;
 int lightVal=0;
 float soilTempVal=0;
 uint16_t moistVal=0;
+int hours=60*60*1000; //hours converted to ms
 
 //other initializations
 #define DHTPIN 2 //what pin the DHT sensor is connected to
@@ -40,10 +39,8 @@ void setup() {
   pinMode(dhtPin,INPUT);
   pinMode(lightSensorPin,INPUT);
   pinMode(valvePin,OUTPUT);
-  /*
-  pinMode(fanPin,OUTPUT);
-  pinMode(lightPin,OUTPUT);
-  */
+  /*pinMode(fanPin,OUTPUT);
+  pinMode(lightPin,OUTPUT);*/
   dht.begin();
   Serial.begin(9600);
   while (!ss.begin(0x36)) {
@@ -62,14 +59,15 @@ void setup() {
 }
 
 void loop() {
-  airTempVal=dht.readTemperature()*9.0/5.0+32.0;
+  airTempVal=dht.readTemperature()*9.0/5.0+32.0; //converted from degrees C to F
   humidityVal=dht.readHumidity();
   lightVal=analogRead(lightSensorPin);
-  soilTempVal=ss.getTemp()*9.0/5.0+32.0;
+  soilTempVal=ss.getTemp()*9.0/5.0+32.0; //converted from degrees C to F
   moistVal=ss.touchRead(0);
   dataLogging();
   actuation();
   waterDelay();
+  //delay(6000); //for functionality testing or a demo (make sure you comment out "waterDelay" if you use this)
 }
 
 void dataLogging() {
@@ -111,6 +109,9 @@ void actuation() {
   } else // this turns off the fan
     digitWrite(fanPin,LOW);
   */
+}
+
+void waterDelay() {
   Serial.print(airTempVal); //debugging
   Serial.print(" ");
   Serial.print(humidityVal); //debugging
@@ -122,35 +123,41 @@ void actuation() {
   Serial.print(moistVal);   //debugging
   Serial.print(" ");
   Serial.println(actuatedValve);  //debugging
-}
-
-void waterDelay() {
+  
   if(actuatedValve==0){ //not watered recently
     if(airTempVal>85){ //not watered recently & hot
       if(lightVal>600){ //not watered recently & hot & bright
-        delay(5000);
+        delay(1*hours);
+        Serial.println(5000); //debugging
       }else{ //not watered recently & hot & not bright
-        delay(6000);
+        delay(2*hours);
+        Serial.println(6000); //debugging
       }
     }else{ //not watered recently & not hot
       if(lightVal>600){ //not watered recently & not hot & bright
-        delay(7000);
+        delay(3*hours);
+        Serial.println(7000); //debugging
       }else{ //not watered recently & not hot & not bright
-        delay(8000);
+        delay(4*hours); 
+        Serial.println(8000); //debugging
       }
     }
   }else { //was watered recently
     if(airTempVal>85){ //was watered recently & hot
       if(lightVal>600){ //was watered recently & hot & bright
-        delay(1000);
+        delay(5*hours);
+        Serial.println(1000); //debugging
       }else{ //was watered recently & hot & not bright
-        delay(2000);
+        delay(6*hours);
+        Serial.println(2000); //debugging
       }
     }else{ //was watered recently & not hot
       if(lightVal>600){ //was watered recently & not hot & bright
-        delay(3000);
+        delay(7*hours);
+        Serial.println(3000); //debugging
       }else{ //was watered recently & not hot & not bright
-        delay(4000);
+        delay(8*hours);
+        Serial.println(4000); //debugging
       }
     }
   }
@@ -171,7 +178,7 @@ dry soil is around 768
 slightly wet soil is around 1016
 moist soil is around 1017
 very moist soil is around 1017
-soak soil is around 1017
+soaked soil is around 1017
 (these soil readings were constant for loose and compact soil)
 --------------------------------------------------
 DHT SENSOR INFO: Temperature conversion formulas... 
