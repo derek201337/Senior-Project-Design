@@ -10,8 +10,6 @@ const int lightSensorPin=0; //light sensor pin
 
 //output pin intializiation
 const int valvePin = 3; //solenoid valve
-/*const int fanPin=???;
-const int lightPin=???;*/
 
 //sd card intializiation
 File sensorDataFile;
@@ -39,8 +37,6 @@ void setup() {
   pinMode(dhtPin,INPUT);
   pinMode(lightSensorPin,INPUT);
   pinMode(valvePin,OUTPUT);
-  /*pinMode(fanPin,OUTPUT);
-  pinMode(lightPin,OUTPUT);*/
   dht.begin();
   Serial.begin(9600);
   while (!ss.begin(0x36)) {
@@ -99,16 +95,6 @@ void actuation() {
     digitalWrite(valvePin, HIGH);
     actuatedValve=0;
   }
-  /* 
-  if(condition not met for light){         //FIX ME
-    digitWrite(lightPin,HIGH);
-  } else // this turns off the light
-    digitWrite(lightPin,LOW);
-  if(condition not met for temperature){   //FIX ME
-    digitWrite(fanPin,HIGH);
-  } else // this turns off the fan
-    digitWrite(fanPin,LOW);
-  */
 }
 
 void waterDelay() {
