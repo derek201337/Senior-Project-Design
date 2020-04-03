@@ -1,0 +1,212 @@
+//Libraries
+#include <DHT.h> //DHT sensor
+#include <SPI.h> //SD card
+#include <SD.h> //SD card
+#include <Adafruit_seesaw.h> //moisture sensor
+
+//input pin intializiation
+const int dhtPin=2; //temperature and humidity sensor pin
+const int lightSensorPin=0;
+
+//output pin intializiation
+const int valvePin=3;
+const int fanPin=4;
+
+//sd card intializiation
+File sensorDataFile;
+
+//actuation tracking
+bool actuatedValve=0; //will track if the plants have been watered recently
+bool actuatedFan=0; //will track if the plants used a fan recently
+
+//value initializations
+float airTempVal=0;
+float humidityVal=0;
+int lightVal=0;
+float soilTempVal=0;
+uint16_t moistVal=0;
+int hours=60*60*1000; //hours converted to ms
+
+//other initializations
+#define DHTPIN 2 //what pin the DHT sensor is connected to
+#define DHTTYPE DHT22 
+DHT dht(DHTPIN,DHTTYPE);
+Adafruit_seesaw ss;
+
+void setup() {
+  pinMode(dhtPin,INPUT);
+  pinMode(lightSensorPin,INPUT);
+  pinMode(valvePin,OUTPUT);
+  pinMode(fanPin,OUTPUT);
+  dht.begin();
+  Serial.begin(9600);
+  while (!ss.begin(0x36)) {
+    Serial.println("Moisture sensor initialization failed."); //wait for moisture sensor to connect
+  } 
+  while (!Serial) {
+    Serial.println("Serial port initialization failed."); ; //wait for serial port to connect
+  }
+  if (!SD.begin(10)) { //wait for SD shield to connect
+    Serial.println("SD card initialization failed.");
+  while (1); //while(1) is an infinite loop, it ends when SD intialization succeeds
+  }
+  sensorDataFile=SD.open("data.txt", FILE_WRITE);
+  sensorDataFile.println("Air Temp Sensor, Humidity Sesnor, Light Sensor, Soil Temp Sensor, Soil Moisture");
+  sensorDataFile.close();
+}
+
+void loop() {
+  dataAcquisition();
+  dataLogging();
+  //valveTest(); //debugging or testing the valve and relay module
+  valveActuation();
+  //fanTest(); //debugging or testing the fan and relay module
+  fanActuation();
+  serialPrintData(); //debugging
+  //waterDelay();
+  delay((1/4)*hours); //15 minute delay
+  //delay(6000);
+}
+
+void dataAcquisition(){
+  airTempVal=dht.readTemperature()*9.0/5.0+32.0; //converted from degrees C to F
+  humidityVal=dht.readHumidity();
+  lightVal=analogRead(lightSensorPin);
+  soilTempVal=ss.getTemp()*9.0/5.0+32.0; //converted from degrees C to F
+  moistVal=ss.touchRead(0);
+}
+
+void dataLogging() {
+  sensorDataFile=SD.open("data.txt",FILE_WRITE);
+  if(sensorDataFile){
+    sensorDataFile.print("   ");
+    sensorDataFile.print(airTempVal);
+    sensorDataFile.print("       ,      ");
+    sensorDataFile.print(humidityVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.print(lightVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.print(soilTempVal);
+    sensorDataFile.print("     ,      ");
+    sensorDataFile.println(moistVal);
+    sensorDataFile.close();
+  }else{
+    Serial.println("error opening data.txt");  //debugging
+  }
+}
+
+void valveActuation() {
+  if(moistVal<825){
+    digitalWrite(valvePin, LOW); // The relay is active low, so it turns on when we set the pin to LOW which opens the valve
+    delay(2000); //how long should we water the plant or garden?
+    digitalWrite(valvePin, HIGH);
+    actuatedValve=1;
+  }else {
+    digitalWrite(valvePin, HIGH);
+    actuatedValve=0;
+  }
+}
+
+void fanActuation(){
+  if(humidityVal>85){ //FIX ME (what should the humidity threshhold be)
+    digitalWrite(fanPin,LOW); //The relay is active low, so the fan turns on when we set the pin to LOW
+    actuatedFan=1;
+  }else{
+    digitalWrite(fanPin,HIGH);
+    actuatedFan=0;
+  }
+}
+
+void waterDelay() {  
+  if(actuatedValve==0){ //not watered recently
+    if(airTempVal>85){ //not watered recently & hot
+      if(lightVal>600){ //not watered recently & hot & bright
+        delay(1*hours);
+        Serial.println(5000); //debugging
+      }else{ //not watered recently & hot & not bright
+        delay(2*hours);
+        Serial.println(6000); //debugging
+      }
+    }else{ //not watered recently & not hot
+      if(lightVal>600){ //not watered recently & not hot & bright
+        delay(3*hours);
+        Serial.println(7000); //debugging
+      }else{ //not watered recently & not hot & not bright
+        delay(4*hours); 
+        Serial.println(8000); //debugging
+      }
+    }
+  }else { //was watered recently
+    if(airTempVal>85){ //was watered recently & hot
+      if(lightVal>600){ //was watered recently & hot & bright
+        delay(5*hours);
+        Serial.println(1000); //debugging
+      }else{ //was watered recently & hot & not bright
+        delay(6*hours);
+        Serial.println(2000); //debugging
+      }
+    }else{ //was watered recently & not hot
+      if(lightVal>600){ //was watered recently & not hot & bright
+        delay(7*hours);
+        Serial.println(3000); //debugging
+      }else{ //was watered recently & not hot & not bright
+        delay(8*hours);
+        Serial.println(4000); //debugging
+      }
+    }
+  }
+}
+
+void valveTest(){
+  digitalWrite(valvePin,LOW); //The relay is active low, so the valve opens when we set the pin to LOW
+  delay(2000);
+  digitalWrite(valvePin,HIGH);
+  delay(6000);
+}
+
+void fanTest(){
+  digitalWrite(fanPin,LOW); //The relay is active low, so the fan turns on when we set the pin to LOW
+  delay(6000);
+  digitalWrite(fanPin,HIGH);
+  delay(6000);
+}
+
+void serialPrintData(){
+  Serial.print(airTempVal);
+  Serial.print(" ");
+  Serial.print(humidityVal);
+  Serial.print(" ");
+  Serial.print(lightVal);
+  Serial.print(" ");
+  Serial.print(soilTempVal);
+  Serial.print(" ");
+  Serial.print(moistVal);
+  Serial.print(" ");
+  Serial.println(actuatedValve);
+  Serial.print(" ");
+  Serial.println(actuatedFan);
+}
+
+/*
+--------------------------------------------------
+LIGHT SENSOR INFO: Reading of...
+less than 10 is dark
+10 to 200 is dim
+200 to 500 is light
+500 to 800 is bright
+greater than 800 is very bright
+--------------------------------------------------
+MOISTURE SENSOR INFO: Reading of... 
+air is around 350
+dry soil is around 768
+slightly wet soil is around 1016
+moist soil is around 1017
+very moist soil is around 1017
+soaked soil is around 1017
+(these soil readings were constant for loose and compact soil)
+--------------------------------------------------
+DHT SENSOR INFO: Temperature conversion formulas... 
+F=(C)*(9/5)+32 
+C=(F-32)*(5/9)
+--------------------------------------------------
+ */
